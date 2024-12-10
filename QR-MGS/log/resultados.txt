@@ -1,0 +1,45 @@
+Exec muestras=1 hilos=16 iteraciones=1000 matriz=matriz_10.mtx
+convergencia despues de 1 iteraciones.
+0 resultado (promedio, tiempo min, tiempo max): 0.0018341, 0.0018341, 0.0018341, -nan (all in sec)  
+Exec muestras=1 hilos=8 iteraciones=1000 matriz=matriz_10.mtx
+convergencia despues de 1 iteraciones.
+0 resultado (promedio, tiempo min, tiempo max): 0.0254347, 0.0254347, 0.0254347, -nan (all in sec)  
+Exec muestras=1 hilos=4 iteraciones=1000 matriz=matriz_10.mtx
+convergencia despues de 1 iteraciones.
+0 resultado (promedio, tiempo min, tiempo max): 0.0003882, 0.0003882, 0.0003882, -nan (all in sec)  
+Exec muestras=1 hilos=2 iteraciones=1000 matriz=matriz_10.mtx
+convergencia despues de 1 iteraciones.
+0 resultado (promedio, tiempo min, tiempo max): 0.0004273, 0.0004273, 0.0004273, -nan (all in sec)
+Exec muestras=1 hilos=1 iteraciones=1000 matriz=matriz_10.mtx
+convergencia despues de 1 iteraciones.
+0 resultado (promedio, tiempo min, tiempo max): 0.0006404, 0.0006404, 0.0006404, -nan (all in sec)
+Exec muestras=1 hilos=16 iteraciones=1000 matriz=matriz_100.mtx
+0 resultado (promedio, tiempo min, tiempo max): 3.74535, 3.74535, 3.74535, -nan (all in sec)
+Exec muestras=1 hilos=8 iteraciones=1000 matriz=matriz_100.mtx
+0 resultado (promedio, tiempo min, tiempo max): 0.790166, 0.790166, 0.790166, -nan (all in sec)
+Exec muestras=1 hilos=4 iteraciones=1000 matriz=matriz_100.mtx
+0 resultado (promedio, tiempo min, tiempo max): 0.796942, 0.796942, 0.796942, -nan (all in sec)
+Exec muestras=1 hilos=2 iteraciones=1000 matriz=matriz_100.mtx
+0 resultado (promedio, tiempo min, tiempo max): 1.23606, 1.23606, 1.23606, -nan (all in sec)
+Exec muestras=1 hilos=1 iteraciones=1000 matriz=matriz_100.mtx
+0 resultado (promedio, tiempo min, tiempo max): 1.98818, 1.98818, 1.98818, -nan (all in sec)
+Exec muestras=1 hilos=16 iteraciones=1000 matriz=matriz_500.mtx
+0 resultado (promedio, tiempo min, tiempo max): 81.1675, 81.1675, 81.1675, -nan (all in sec)
+Exec muestras=1 hilos=8 iteraciones=1000 matriz=matriz_500.mtx
+0 resultado (promedio, tiempo min, tiempo max): 116.13, 116.13, 116.13, -nan (all in sec)
+Exec muestras=1 hilos=4 iteraciones=1000 matriz=matriz_500.mtx
+0 resultado (promedio, tiempo min, tiempo max): 108.649, 108.649, 108.649, -nan (all in sec)
+Exec muestras=1 hilos=2 iteraciones=1000 matriz=matriz_500.mtx
+0 resultado (promedio, tiempo min, tiempo max): 161.898, 161.898, 161.898, -nan (all in sec)
+Exec muestras=1 hilos=1 iteraciones=1000 matriz=matriz_500.mtx
+0 resultado (promedio, tiempo min, tiempo max): 304.167, 304.167, 304.167, -nan (all in sec)
+Exec muestras=1 hilos=16 iteraciones=1000 matriz=matriz_1000.mtx
+0 resultado (promedio, tiempo min, tiempo max): 629.468, 629.468, 629.468, -nan (all in sec)
+Exec muestras=1 hilos=8 iteraciones=1000 matriz=matriz_1000.mtx
+0 resultado (promedio, tiempo min, tiempo max): 628.941, 628.941, 628.941, -nan (all in sec)
+Exec muestras=1 hilos=4 iteraciones=1000 matriz=matriz_1000.mtx
+0 resultado (promedio, tiempo min, tiempo max): 821.171, 821.171, 821.171, -nan (all in sec)
+Exec muestras=1 hilos=2 iteraciones=1000 matriz=matriz_1000.mtx
+0 resultado (promedio, tiempo min, tiempo max): 1264.22, 1264.22, 1264.22, -nan (all in sec)
+Exec muestras=1 hilos=2 iteraciones=1000 matriz=matriz_1000.mtx
+0 resultado (promedio, tiempo min, tiempo max): 1664.28, 1664.28, 1664.28, -nan (all in sec)
