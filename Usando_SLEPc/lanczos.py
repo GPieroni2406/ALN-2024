@@ -2,7 +2,7 @@ from slepc4py import SLEPc
 from petsc4py import PETSc
 
 def create_sparse_hilbert_matrix(n):
-    A = PETSc.Mat().create()
+    A = PETSc.Mat().create(PETSc.COMM_SELF)
     A.setSizes([n, n])
     A.setType(PETSc.Mat.Type.AIJ)  # Formato disperso
     A.setFromOptions()
@@ -19,7 +19,7 @@ def load_matrix(filename="matrix.dat"):
     """
     try:
         # Crear el objeto Mat
-        A = PETSc.Mat().create()
+        A = PETSc.Mat().create(PETSc.COMM_SELF)
         viewer = PETSc.Viewer().createBinary(filename, mode='r')  # Abrir el archivo como binario
 
         # Leer la matriz desde el archivo
@@ -28,11 +28,11 @@ def load_matrix(filename="matrix.dat"):
         A.setFromOptions()  # Asegurar que las opciones se configuren automáticamente
         A.setUp()  # Configurar dimensiones y propiedades
 
-        # Verificar y mostrar contenido
-        rank = PETSc.COMM_WORLD.getRank()
-        if rank == 0:
-            print("Contenido de la matriz cargada:")
-            A.view()
+        # # Verificar y mostrar contenido
+        # rank = PETSc.COMM_WORLD.getRank()
+        # if rank == 0:
+        #     print("Contenido de la matriz cargada:")
+        #     A.view()
 
         return A
     except Exception as e:
@@ -46,16 +46,17 @@ def solve_lanczos(filename="matrix.dat", output_file="results/results_lanczos.tx
     if A is None:
         print("Error: La matriz no se cargó correctamente. Verifica el archivo y vuelve a intentarlo.")
         exit(1)  # Salir si la matriz no es válida
-    eps = SLEPc.EPS().create()
+    eps = SLEPc.EPS().create(PETSc.COMM_SELF)
     eps.setOperators(A)
     eps.setType(SLEPc.EPS.Type.LANCZOS)
     eps.setWhichEigenpairs(SLEPc.EPS.Which.LARGEST_REAL)
+    eps.setDimensions(nev=A.getSize()[0])
     eps.setProblemType(SLEPc.EPS.ProblemType.HEP)
     eps.setTolerances(1e-6, 5000)
     # Configuración específica para Lanczos
     opts = PETSc.Options()
     opts["eps_lanczos_reorthog"] = "local"  # Tipo de re-ortogonalización
-    opts["eps_lanczos_restart"] = 20       # Máximo tamaño del subespacio antes del reinicio
+    #opts["eps_lanczos_restart"] = 20       # Máximo tamaño del subespacio antes del reinicio
 
     eps.setFromOptions()
     eps.solve()
@@ -63,15 +64,16 @@ def solve_lanczos(filename="matrix.dat", output_file="results/results_lanczos.tx
     nconv = eps.getConverged()
     rank = PETSc.COMM_WORLD.getRank()
     if rank == 0:
-        with open(output_file, "a") as f:
-            f.write(f"Número de valores propios convergidos: {nconv}\n")
-            if nconv > 0:
-                for i in range(nconv):
-                    eigenvalue = eps.getEigenvalue(i)
-                    f.write(f"  λ[{i}] = {eigenvalue:.7f}\n")
-                    #xr, _ = A.getVecs()
-                    #eps.getEigenvector(i, xr)
-                    #f.write(f"  Vector propio [{i}] = {xr[:].tolist()}\n")
+        print(f"Número de valores propios convergidos: {nconv}")
+        # with open(output_file, "a") as f:
+        #     f.write(f"Número de valores propios convergidos: {nconv}\n")
+        #     if nconv > 0:
+        #         for i in range(nconv):
+        #             eigenvalue = eps.getEigenvalue(i)
+        #             f.write(f"  λ[{i}] = {eigenvalue:.7f}\n")
+        #             #xr, _ = A.getVecs()
+        #             #eps.getEigenvector(i, xr)
+        #             #f.write(f"  Vector propio [{i}] = {xr[:].tolist()}\n")
 
     A.destroy()
     eps.destroy()

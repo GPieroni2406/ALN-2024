@@ -1,0 +1,218 @@
+Generando matriz de tamaño 10...
+Matriz generada y guardada en matrix.dat (tamaño: 10x10, densidad: 0.01)
+
+Ejecutando arnoldi con 1 procesos...
+Número de valores propios convergidos: 10
+Tiempo de ejecución: 0.0081 segundos
+Uso de memoria adicional: 6.82 MB
+
+Ejecutando arnoldi con 2 procesos...
+Número de valores propios convergidos: 10
+Tiempo de ejecución: 0.0068 segundos
+Uso de memoria adicional: 6.33 MB
+
+Ejecutando arnoldi con 4 procesos...
+Número de valores propios convergidos: 10
+Tiempo de ejecución: 0.0129 segundos
+Uso de memoria adicional: 5.76 MB
+
+
+Ejecutando kyrlov-schur con 1 procesos...
+Número de valores propios convergidos: 10
+Tiempo de ejecución: 0.0024 segundos
+Uso de memoria adicional: 8.27 MB
+
+Ejecutando kyrlov-schur con 2 procesos...
+Número de valores propios convergidos: 10
+Tiempo de ejecución: 0.0034 segundos
+Uso de memoria adicional: 8.46 MB
+
+Ejecutando kyrlov-schur con 4 procesos...
+Número de valores propios convergidos: 10
+Tiempo de ejecución: 0.0077 segundos
+Uso de memoria adicional: 8.16 MB
+
+
+
+
+Generando matriz de tamaño 50...
+Matriz generada y guardada en matrix.dat (tamaño: 50x50, densidad: 0.01)
+
+Ejecutando arnoldi con 1 procesos...
+Número de valores propios convergidos: 50
+Tiempo de ejecución: 0.0076 segundos
+Uso de memoria adicional: 6.92 MB
+
+Ejecutando arnoldi con 2 procesos...
+Número de valores propios convergidos: 50
+Tiempo de ejecución: 0.0249 segundos
+Uso de memoria adicional: 6.36 MB
+
+Ejecutando arnoldi con 4 procesos...
+Número de valores propios convergidos: 50
+Tiempo de ejecución: 0.3045 segundos
+Uso de memoria adicional: 4.96 MB
+
+
+Ejecutando kyrlov-schur con 1 procesos...
+Número de valores propios convergidos: 50
+Tiempo de ejecución: 0.0033 segundos
+Uso de memoria adicional: 8.02 MB
+
+Ejecutando kyrlov-schur con 2 procesos...
+Número de valores propios convergidos: 50
+Tiempo de ejecución: 0.0062 segundos
+Uso de memoria adicional: 7.90 MB
+
+Ejecutando kyrlov-schur con 4 procesos...
+Número de valores propios convergidos: 50
+Tiempo de ejecución: 0.0142 segundos
+Uso de memoria adicional: 8.23 MB
+
+
+
+
+Generando matriz de tamaño 100...
+Matriz generada y guardada en matrix.dat (tamaño: 100x100, densidad: 0.01)
+
+Ejecutando arnoldi con 1 procesos...
+Número de valores propios convergidos: 100
+Tiempo de ejecución: 0.0301 segundos
+Uso de memoria adicional: 7.03 MB
+
+Ejecutando arnoldi con 2 procesos...
+Número de valores propios convergidos: 100
+Tiempo de ejecución: 0.0324 segundos
+Uso de memoria adicional: 7.95 MB
+
+Ejecutando arnoldi con 4 procesos...
+Número de valores propios convergidos: 100
+Tiempo de ejecución: 0.1719 segundos
+Uso de memoria adicional: 7.46 MB
+
+
+Ejecutando kyrlov-schur con 1 procesos...
+Número de valores propios convergidos: 100
+Tiempo de ejecución: 0.0084 segundos
+Uso de memoria adicional: 8.16 MB
+
+Ejecutando kyrlov-schur con 2 procesos...
+Número de valores propios convergidos: 100
+Tiempo de ejecución: 0.0121 segundos
+Uso de memoria adicional: 8.57 MB
+
+Ejecutando kyrlov-schur con 4 procesos...
+Número de valores propios convergidos: 100
+Tiempo de ejecución: 0.0265 segundos
+Uso de memoria adicional: 8.45 MB
+
+
+
+
+Generando matriz de tamaño 500...
+Matriz generada y guardada en matrix.dat (tamaño: 500x500, densidad: 0.01)
+
+Ejecutando arnoldi con 1 procesos...
+Número de valores propios convergidos: 500
+Tiempo de ejecución: 0.9324 segundos
+Uso de memoria adicional: 16.76 MB
+
+Ejecutando arnoldi con 2 procesos...
+Número de valores propios convergidos: 500
+Tiempo de ejecución: 1.0287 segundos
+Uso de memoria adicional: 13.91 MB
+
+Ejecutando arnoldi con 4 procesos...
+Número de valores propios convergidos: 500
+Tiempo de ejecución: 1.6959 segundos
+Uso de memoria adicional: 15.67 MB
+
+
+Ejecutando kyrlov-schur con 1 procesos...
+Número de valores propios convergidos: 500
+Tiempo de ejecución: 0.4244 segundos
+Uso de memoria adicional: 15.84 MB
+
+Ejecutando kyrlov-schur con 2 procesos...
+Número de valores propios convergidos: 500
+Tiempo de ejecución: 0.3846 segundos
+Uso de memoria adicional: 15.34 MB
+
+Ejecutando kyrlov-schur con 4 procesos...
+Número de valores propios convergidos: 500
+Tiempo de ejecución: 0.6394 segundos
+Uso de memoria adicional: 13.04 MB
+
+
+
+
+Generando matriz de tamaño 1000...
+Matriz generada y guardada en matrix.dat (tamaño: 1000x1000, densidad: 0.01)
+
+Ejecutando arnoldi con 1 procesos...
+Número de valores propios convergidos: 1000
+Tiempo de ejecución: 17.8119 segundos
+Uso de memoria adicional: 43.98 MB
+
+Ejecutando arnoldi con 2 procesos...
+Número de valores propios convergidos: 1000
+Tiempo de ejecución: 17.4007 segundos
+Uso de memoria adicional: 40.85 MB
+
+Ejecutando arnoldi con 4 procesos...
+Número de valores propios convergidos: 1000
+Tiempo de ejecución: 28.6852 segundos
+Uso de memoria adicional: 39.12 MB
+
+
+Ejecutando kyrlov-schur con 1 procesos...
+Número de valores propios convergidos: 1000
+Tiempo de ejecución: 4.5952 segundos
+Uso de memoria adicional: 37.92 MB
+
+Ejecutando kyrlov-schur con 2 procesos...
+Número de valores propios convergidos: 1000
+Tiempo de ejecución: 3.8936 segundos
+Uso de memoria adicional: 34.12 MB
+
+Ejecutando kyrlov-schur con 4 procesos...
+Número de valores propios convergidos: 1000
+Tiempo de ejecución: 5.6434 segundos
+Uso de memoria adicional: 31.98 MB
+
+
+
+
+Generando matriz de tamaño 2000...
+Matriz generada y guardada en matrix.dat (tamaño: 2000x2000, densidad: 0.01)
+
+Ejecutando arnoldi con 1 procesos...
+Número de valores propios convergidos: 2000
+Tiempo de ejecución: 227.0662 segundos
+Uso de memoria adicional: 161.00 MB
+
+Ejecutando arnoldi con 2 procesos...
+Número de valores propios convergidos: 2000
+Tiempo de ejecución: 208.0746 segundos
+Uso de memoria adicional: 144.27 MB
+
+Ejecutando arnoldi con 4 procesos...
+Número de valores propios convergidos: 2000
+Tiempo de ejecución: 290.5321 segundos
+Uso de memoria adicional: 136.34 MB
+
+
+Ejecutando kyrlov-schur con 1 procesos...
+Número de valores propios convergidos: 2000
+Tiempo de ejecución: 39.3329 segundos
+Uso de memoria adicional: 129.96 MB
+
+Ejecutando kyrlov-schur con 2 procesos...
+Número de valores propios convergidos: 2000
+Tiempo de ejecución: 28.0200 segundos
+Uso de memoria adicional: 114.63 MB
+
+Ejecutando kyrlov-schur con 4 procesos...
+Número de valores propios convergidos: 2000
+Tiempo de ejecución: 33.4852 segundos
+Uso de memoria adicional: 107.53 MB

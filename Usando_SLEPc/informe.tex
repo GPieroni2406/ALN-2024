@@ -1,0 +1,662 @@
+\documentclass{article}
+\usepackage{amsmath}
+\usepackage{listings}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{caption}
+\usepackage{float}
+\usepackage[utf8]{inputenc}
+\usepackage{cite}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{enumitem}
+
+
+\begin{document}
+
+\title{ALN - Trabajo Final 
+\\Métodos para hallar valores y vectores propios en
+arquitecturas paralelas}
+\author{Guzmán Pieroni CI: 4.975.738-7, Agustín Rivero CI: 5.109.772-7}
+\date{X de Diciembre de 2024}
+\maketitle
+
+\section{Introducción}
+El cálculo de valores y vectores propios es un problema central en álgebra lineal con aplicaciones fundamentales en análisis estructural, aprendizaje automático, dinámica de sistemas y procesamiento de datos masivos. La eficiencia computacional y la precisión numérica son aspectos críticos al abordar este problema, especialmente cuando se trabaja con matrices de gran tamaño o dispersas.
+Este informe evalúa diferentes métodos para calcular valores y vectores propios en arquitecturas modernas, destacando su implementación y eficiencia en contextos seriales y paralelos.
+En este contexto, diferentes algoritmos han sido desarrollados para satisfacer diversas necesidades computacionales y características de las matrices. En este trabajo se exploraron algunos métodos destacados. Los mismo son introducidos brevemente debajo y mejor desarrollados en las proximas secciones:
+\begin{itemize}
+    \item \textbf{Lanczos:} Ideal para matrices dispersas, se utilizo en tareas anteriores. Este método iterativo se enfoca en calcular los valores propios más grandes o más pequeños con alta eficiencia.
+    \item \textbf{Jacobi:} Utilizado principalmente para matrices densas y simétricas, aplica rotaciones sucesivas para diagonalizar la matriz.
+    \item \textbf{Método de las potencias:} Una técnica sencilla que aproxima iterativamente el valor propio dominante de una matriz.
+    \item \textbf{Método QR:} Estándar para matrices densas, este método utiliza descomposiciones ortogonales iterativas para hallar valores y vectores propios.
+    \item \textbf{Eigendecomposition:}  Este método busca descomponer una matriz cuadrada \( A \) en sus componentes fundamentales: una matriz de vectores propios \( V \), una matriz diagonal de valores propios \( \Lambda \) y la inversa de \( V \). Es ideal para analizar la estructura de una matriz, simplificando cálculos como la potenciación de matrices (\( A^k \)). Aunque es más directo que los métodos iterativos, depende de que la matriz sea diagonalizable.
+    \item \textbf{Krylov-Schur:} Método moderno para resolver problemas de valores propios, especialmente en matrices dispersas y grandes. Se basa en subespacios de Krylov.
+    \item \textbf{Arnoldi:} Algoritmo iterativo utilizado para calcular valores propios de matrices no simétricas. Es una generalización del método de Lanczos. También se basa en la construcción de subespacios de Krylov.
+\end{itemize}
+
+El objetivo principal es analizar y comparar algunos de los métodos desde un enfoque práctico, considerando implementaciones seriales y paralelas en arquitecturas modernas.
+
+\section{Conceptos básicos}
+Se introducen los conceptos básicos a utilizar a lo largo del proyecto.
+En álgebra lineal, los valores propios (\(\lambda\)) y sus vectores asociados (\(v\)) de una matriz cuadrada \(A \in \mathbb{R}^{n \times n}\) satisfacen la ecuación:
+\[
+A v = \lambda v,
+\]
+donde \(\lambda\) es un escalar y \(v \neq 0\) es un vector no nulo. Este problema surge en numerosos contextos y requiere algoritmos eficientes para abordar los siguientes desafíos:
+\begin{enumerate}
+    \item \textbf{Costo computacional:} Los métodos directos, como QR, tienen una complejidad de \(O(n^3)\), lo que puede ser prohibitivo para matrices grandes.
+    \item \textbf{Precisión numérica:} Los métodos iterativos son sensibles al error de redondeo, especialmente en matrices mal condicionadas.
+\end{enumerate}
+
+A continuación, se describen los métodos analizados en este trabajo, destacando sus principales características, casos de uso y limitaciones:
+
+\subsection{Método de Lanczos}
+El método de Lanczos es un algoritmo iterativo que sobresale en la resolución de problemas con matrices dispersas y de gran tamaño. Su principal objetivo es reducir la matriz original a una forma tridiagonal más manejable, lo que facilita la obtención de unos pocos valores propios dominantes con alta eficiencia. Este enfoque es especialmente útil en aplicaciones como aprendizaje automático, análisis de redes y simulaciones físicas, donde solo se necesitan los valores propios más relevantes.
+
+Aunque es un método altamente eficiente, tiene ciertas limitaciones. Por ejemplo, la dependencia entre iteraciones puede dificultar su paralelización. Además, su rendimiento depende de la elección del vector inicial, que puede influir en la convergencia del algoritmo. La implementación moderna del método de Lanczos está disponible en bibliotecas como \textbf{ARPACK}, ampliamente utilizadas en software científico.
+
+\subsection{Método de Jacobi}
+El método de Jacobi, diseñado para matrices densas y simétricas, es una técnica que aplica rotaciones ortogonales sucesivas para diagonalizar la matriz. Este proceso transforma la matriz original en una matriz diagonal, cuyos elementos corresponden a los valores propios. Aunque su costo computacional es alto (\(O(n^3)\)), sigue siendo relevante en problemas de tamaño moderado donde se requiere alta precisión.
+
+Una ventaja notable del método de Jacobi es su robustez para resolver problemas con matrices simétricas mal condicionadas. Sin embargo, en matrices grandes, su complejidad lo hace menos competitivo frente a métodos más avanzados. Este método está optimizado en bibliotecas como \textbf{LAPACK}, que mejoran su rendimiento en hardware moderno.
+
+\subsection{Método de las potencias}
+El método de las potencias es un algoritmo iterativo directo y bastante fácil de implementar, diseñado para calcular el valor propio dominante (el mayor en magnitud) de una matriz. Su simplicidad radica en iterar con un vector inicial hasta que converge al vector propio asociado al mayor valor propio.
+
+Sin embargo, este método tiene limitaciones significativas. Es ineficiente para calcular múltiples valores propios, y su desempeño puede verse afectado en matrices no simétricas o mal condicionadas. A pesar de estas restricciones, es una excelente herramienta introductoria y se utiliza como base para métodos iterativos más avanzados, como Lanczos. Su integración en herramientas como \textbf{NumPy} lo hace accesible para aplicaciones prácticas.
+
+\subsection{Método QR}
+El método QR es un estándar ampliamente utilizado para calcular valores propios en matrices densas. Este algoritmo utiliza descomposiciones ortogonales iterativas para transformar una matriz en una forma diagonalizada. Durante cada iteración, la matriz se descompone en un producto \(A = QR\), donde \(Q\) es una matriz ortogonal y \(R\) es una matriz triangular superior. Luego, la matriz se actualiza como \(A' = RQ\), acercándose progresivamente a una matriz diagonal.
+
+El método QR es robusto y preciso, pero su costo computacional (\(O(n^3)\)) lo hace más adecuado para matrices densas de tamaño moderado. 
+Bibliotecas modernas como \textbf{LAPACK} y \textbf{cuBLAS} han optimizado este método para arquitecturas paralelas, permitiendo su uso en sistemas multinúcleo y GPUs.
+
+\subsection{Eigendecomposition}
+La Eigendecomposition (o descomposición en valores propios) es una técnica que descompone una matriz cuadrada \(A\) en tres componentes fundamentales:
+\[
+A = V \Lambda V^{-1},
+\]
+donde \(V\) es una matriz de vectores propios, \(\Lambda\) es una matriz diagonal de valores propios, y \(V^{-1}\) es la inversa de \(V\). Este método es particularmente útil para matrices simétricas y diagonalizables.
+
+Entre sus principales ventajas está la simplificación de cálculos complejos, como potencias de matrices (\(A^k = V \Lambda^k V^{-1}\)), y su aplicación en problemas de reducción de dimensionalidad, como el análisis de componentes principales (PCA). Sin embargo, no todas las matrices son diagonalizables, lo que limita su aplicabilidad en ciertos contextos. La Eigendecomposition es una herramienta central en álgebra lineal numérica, con implementaciones optimizadas en bibliotecas como \textbf{SciPy} y \textbf{MATLAB}, que la hacen adecuada para análisis en matrices densas.
+
+\subsection{Krylov-Schur}
+
+El método de Krylov-Schur es una extensión moderna del método de Arnoldi, diseñado para calcular un subconjunto de valores propios de una matriz, especialmente aquellos más relevantes para el problema (por ejemplo, los valores propios de mayor magnitud). Este método combina técnicas iterativas con un reinicio grueso (\textit{thick restart}) que mejora la estabilidad y la convergencia, siendo ideal para problemas de gran escala.
+\\
+El método trabaja sobre un subespacio de Krylov definido como:
+\[
+K_m(A, v) = \text{span}\{v, Av, A^2v, \ldots, A^{m-1}v\},
+\]
+donde \(A\) es la matriz de entrada y \(v\) es un vector inicial. Este subespacio es utilizado para aproximar los valores y vectores propios dominantes de \(A\).
+
+\subsection{Método de Arnoldi}
+
+El método de Arnoldi es un algoritmo iterativo diseñado para calcular un subconjunto de valores propios y sus vectores asociados en matrices no simétricas. Es una generalización del método de Lanczos que utiliza subespacios de Krylov para aproximar los valores propios más relevantes.
+En cada iteración, el método ortogonaliza el nuevo vector generado respecto a los vectores anteriores, asegurando que los vectores del subespacio de Krylov sean ortogonales.
+
+\section{Bibliotecas relevantes para ALN}
+En el desarrollo de soluciones numéricas para problemas de valores y vectores propios, las bibliotecas de álgebra lineal juegan un rol fundamental. Estas herramientas están optimizadas para manejar matrices densas y dispersas, implementando algoritmos avanzados con soporte para paralelización. A continuación, se describen las bibliotecas que fueron investigadas, y otras que ya fueron usadas en las tareas del curso:
+
+\subsection{LAPACK (Linear Algebra PACKage)}
+LAPACK es una biblioteca utilizada para resolver problemas de álgebra lineal en matrices densas, incluyendo la descomposición QR, el método de Jacobi y el cálculo de valores propios. Implementada en Fortran, ofrece un alto nivel de optimización en hardware moderno y se integra con variantes paralelizadas como Intel MKL (Math Kernel Library).
+
+\subsection{SuiteSparse}
+SuiteSparse es un conjunto de bibliotecas diseñadas específicamente para manejar matrices dispersas. Su módulo SPQR implementa una variante del método QR para matrices dispersas, mientras que otras bibliotecas en este conjunto, como UMFPACK, optimizan la factorización LU en problemas dispersos.
+
+\subsection{ARPACK (Arnoldi PACKage)}
+ARPACK se especializa en métodos iterativos como Lanczos y Arnoldi, diseñados para calcular valores propios de matrices grandes y dispersas. Esta biblioteca es particularmente útil cuando solo se requieren algunos valores propios, evitando la necesidad de procesar toda la matriz.
+
+\subsection{cuBLAS y cuSOLVER}
+Desarrolladas por NVIDIA, estas bibliotecas están optimizadas para GPUs y ofrecen soporte para cálculos densos, incluyendo descomposiciones QR y el cálculo de valores propios. Son ideales para aprovechar la paralelización masiva que proporcionan las GPUs modernas.
+
+\subsection{Intel MKL}
+Intel MKL es una implementación altamente optimizada de LAPACK y BLAS, diseñada para aprovechar arquitecturas multinúcleo y SIMD (Single Instruction, Multiple Data), las cuales ya fueron brindadas en el curso.
+Ofrece soporte para paralelización en operaciones como descomposición QR y el cálculo de valores propios.
+
+\subsection{SciPy y NumPy}
+En el mundo de Python, SciPy y NumPy proporcionan interfaces accesibles para cálculos de álgebra lineal. Utilizan LAPACK y ARPACK como backend, permitiendo a los usuarios ejecutar métodos como QR, Jacobi y Lanczos de manera sencilla.
+
+\subsection{SLEPc}
+SLEPc (Scalable Library for Eigenvalue Problem Computations) utiliza diversos métodos numéricos iterativos para resolver problemas de valores propios y vectores propios, tanto para matrices pequeñas como para matrices grandes y dispersas. Los métodos disponibles en SLEPc están optimizados para trabajar en paralelo y son altamente configurables dependiendo del tipo de problema que se quiere resolver.
+
+
+\subsection{Comparativa de bibliotecas}
+Segun lo estudiado, cada biblioteca tiene fortalezas (y debilidades) específicas que la hacen adecuada (o no) para diferentes tipos de problemas.
+La siguiente tabla resume las principales características, fortalezas y limitaciones de las bibliotecas investigadas para resolver problemas de valores y vectores propios:
+
+\begin{table}[H]
+\centering
+\caption{Comparativa de bibliotecas relevantes para ALN}
+\label{tab:comparativa_bibliotecas}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|p{3cm}|p{3.5cm}|p{4.5cm}|p{3cm}|}
+\hline
+\textbf{Biblioteca} & \textbf{Tipo de Matriz Adecuada} & \textbf{Características Principales} & \textbf{Soporte para Paralelización} \\ \hline
+LAPACK             & Densas                  & Resolución de problemas de álgebra lineal (QR, Jacobi, valores propios). Optimizada para hardware moderno. & Parcial (a través de Intel MKL o variantes como ScaLAPACK). \\ \hline
+SuiteSparse        & Dispersas               & Optimizada para matrices dispersas. Incluye SPQR (QR) y UMFPACK (LU). & Limitado a operaciones dispersas, no diseñado para GPU. \\ \hline
+ARPACK             & Dispersas               & Métodos iterativos como Lanczos y Arnoldi. Especialmente útil para calcular un subconjunto de valores propios. & Compatible con MPI para problemas grandes. \\ \hline
+cuBLAS/cuSOLVER    & Densas                  & Optimizadas para GPUs. Implementaciones rápidas de QR y cálculo de valores propios. & Sí, utilizando GPUs para paralelización masiva. \\ \hline
+Intel MKL          & Densas                  & Versión optimizada de LAPACK y BLAS, diseñada para arquitecturas multinúcleo y SIMD. & Sí, con excelente escalabilidad en CPUs multinúcleo. \\ \hline
+SciPy/NumPy        & Densas y Dispersas      & Interfaces accesibles para cálculos lineales en Python. Utilizan LAPACK y ARPACK como backend. & No directamente paralelizadas, pero compatibles con herramientas externas. \\ \hline
+SLEPc              & Densas y Dispersas      & Métodos iterativos avanzados para valores propios. Optimizada para problemas paralelos. & Excelente soporte para paralelización (MPI). \\ \hline
+\end{tabular}%
+}
+\end{table}
+
+
+
+\section{Estado del Arte}
+
+El estado del arte en álgebra lineal numérica está marcado por avances significativos en arquitecturas de hardware, algoritmos especializados y bibliotecas optimizadas. Estos desarrollos permiten abordar problemas complejos con mayor eficiencia y precisión. A continuación, se describe la evolución en estas áreas:
+
+\subsection{Avances en arquitecturas de hardware}
+El progreso en hardware especializado ha transformado el panorama de la computación científica, permitiendo que algoritmos de álgebra lineal se ejecuten de manera más rápida y eficiente. Entre las arquitecturas más relevantes se encuentran:
+
+\subsubsection{Memoria compartida y distribuida}
+La gestión eficiente de la memoria es crucial en sistemas paralelos. En arquitecturas de memoria compartida, todos los núcleos acceden a un espacio de memoria común, simplificando la comunicación entre cada uno de los procesos. En contraste, los sistemas de memoria distribuida, como los usados en clústeres de alto rendimiento, requieren bibliotecas como MPI para coordinar la transferencia de datos entre nodos. Estas arquitecturas son ideales para problemas masivos, donde la matriz o sus componentes se distribuyen en múltiples unidades de procesamiento para maximizar la escalabilidad.
+
+\paragraph{MPI: Interfaz de Paso de Mensajes}
+
+Este es un estándar diseñado para facilitar la comunicación entre procesos en sistemas de memoria distribuida. En lugar de compartir memoria, los procesos intercambian información mediante el envío y recepción de mensajes, lo que permite que múltiples nodos colaboren en problemas de gran escala.
+
+\paragraph{Características principales}
+\begin{itemize}
+    \item Permite la comunicación entre procesos en arquitecturas heterogéneas y distribuidas.
+    \item Soporta operaciones básicas (\texttt{MPI\_Send}, \texttt{MPI\_Recv}) y colectivas (\texttt{MPI\_Reduce}, \texttt{MPI\_Broadcast}).
+    \item Escalabilidad para miles de procesos, optimizando su uso en clústeres grandes.
+\end{itemize}
+
+\paragraph{Ventajas}
+\begin{itemize}
+    \item Portabilidad en diferentes plataformas.
+    \item Compatible con simulaciones y análisis de datos masivos.
+    \item Alta flexibilidad para problemas personalizados.
+\end{itemize}
+
+\subsubsection{Procesadores multinúcleo - CPU}
+Los procesadores multinúcleo, presentes en la mayoría de las CPU modernas, facilitan la ejecución paralela de tareas mediante hilos concurrentes. Esto es especialmente útil para operaciones costosas como factorizaciones QR o multiplicaciones matriciales, que pueden dividirse entre los núcleos disponibles. Herramientas como OpenMP permiten implementar paralelización en estos entornos con relativa facilidad, optimizando el uso de recursos en aplicaciones científicas e industriales.
+\paragraph{OpenMP: Multiprocesamiento en CPU}
+Esta es una herramienta comunmente para la programación paralela en sistemas con memoria compartida. Proporciona una forma sencilla y eficiente de aprovechar múltiples núcleos de una CPU mediante el uso de directivas en el código.
+
+\textbf{Características principales:}
+\begin{itemize}
+    \item Basado en un modelo de memoria compartida, donde todos los hilos tienen acceso al mismo espacio de memoria.
+    \item Utiliza directivas pragmáticas (\texttt{\#pragma}) en lenguajes como C, C++ y Fortran para paralelizar secciones específicas del código.
+    \item Soporte para tareas dinámicas y estáticas, balanceando la carga entre los hilos.
+\end{itemize}
+
+\textbf{Ventajas:}
+\begin{itemize}
+    \item Facilidad de uso: permite paralelizar programas de manera incremental, agregando directivas en puntos clave del código.
+    \item Portabilidad: compatible con la mayoría de compiladores modernos y plataformas.
+    \item Escalabilidad: optimiza el rendimiento al utilizar todos los núcleos disponibles en el sistema.
+\end{itemize}
+
+
+\subsubsection{GPU - Unidades de procesamiento gráfico}
+Originalmente desarrolladas para tareas gráficas, las GPUs han evolucionado convirtiendose en plataformas poderosas para cálculos de propósito general, gracias a su diseño con miles de núcleos especializados. Estas unidades sobresalen en operaciones altamente paralelizables, como las necesarias en álgebra lineal. Bibliotecas como cuBLAS y cuSOLVER (mencionadas anteriormente) están diseñadas específicamente para aprovechar las capacidades de las GPUs, permitiendo cálculos eficientes en matrices densas. Además, su uso en algoritmos iterativos, ha demostrado mejoras significativas en rendimiento.
+
+
+
+\subsection{Algoritmos especializados}
+El diseño de algoritmos eficientes ha evolucionado para abordar los desafíos del cálculo de valores y vectores propios, adaptándose a diferentes tipos de matrices y requerimientos computacionales. Los métodos se clasifican en:
+
+\begin{itemize}
+    \item \textbf{Métodos iterativos:}
+    Estos algoritmos aproximan unos pocos valores propios relevantes, siendo ideales para matrices dispersas grandes donde el cálculo directo sería casi imposible.
+    \begin{itemize}
+        \item \textbf{Método de las Potencias:} Aproxima el valor propio dominante iterativamente. Es sencillo, pero limitado a un único valor propio.
+        \item \textbf{Método de Lanczos:} Reduce matrices dispersas simétricas a una forma tridiagonal para calcular valores propios dominantes.
+        \item \textbf{Método de Arnoldi:} Generaliza Lanczos para matrices no simétricas, utilizando subespacios de Krylov y generando una matriz de Hessenberg.
+        \item \textbf{Método Krylov-Schur:} Extensión de Arnoldi que introduce reinicio grueso (\textit{thick restart}) para mejorar estabilidad y memoria.
+    \end{itemize}
+
+    \item \textbf{Métodos directos:}
+    Estos métodos calculan todos los valores propios explícitamente, siendo más adecuados para matrices densas pequeñas o moderadas.
+    \begin{itemize}
+        \item \textbf{Método de Jacobi:} Utiliza rotaciones sucesivas para diagonalizar matrices simétricas densas.
+        \item \textbf{Método QR:} Descomposición iterativa que transforma matrices densas en una forma diagonal.
+        \item \textbf{Eigendecomposition:} Descompone \(A = V \Lambda V^{-1}\), útil para matrices diagonalizables.
+    \end{itemize}
+
+    \item \textbf{Métodos híbridos:}
+    Combinan técnicas iterativas y directas para maximizar eficiencia y precisión, siendo útiles en problemas específicos o mal condicionados. Los mismos no fueron trabajados a fondo en el informe.
+    \begin{itemize}
+        \item \textbf{Shift-and-Invert:} Convierte el problema en \(B = (A - \sigma I)^{-1}\) para priorizar valores propios cercanos a \(\sigma\).
+        \item \textbf{Métodos de Subespacios Bloque:} Calculan varios valores propios simultáneamente, escalando bien en sistemas paralelos.
+        \item \textbf{Preacondicionamiento:} Mejora la convergencia de métodos iterativos al transformar la matriz para facilitar el cálculo de valores propios.
+    \end{itemize}
+\end{itemize}
+
+
+\subsection{Desafíos actuales}
+A pesar de los avances en algoritmos y bibliotecas, el cálculo de valores y vectores propios sigue enfrentando varios desafíos, especialmente en el contexto de problemas masivos y arquitecturas modernas. Entre los desafíos más destacados se estudiaron:
+
+\begin{enumerate}
+    \item \textbf{Escalabilidad en problemas masivos:}
+    La resolución de valores y vectores propios en matrices de gran tamaño plantea desafíos tanto computacionales como de memoria. A medida que aumenta el tamaño de las matrices, también lo hace la complejidad de los algoritmos, lo que puede generar problemas de tiempo de ejecución excesivamente largos o un uso de memoria que excede las capacidades de los sistemas disponibles. Esto es particularmente crítico en aplicaciones como simulaciones físicas, aprendizaje automático y análisis de redes, donde el tamaño de los datos continúa creciendo exponencialmente.
+
+    \item \textbf{Integración eficiente de paralelización en métodos iterativos:}
+    Los métodos iterativos, como Lanczos y Arnoldi, dependen de cálculos que son secuenciales por naturaleza, ya que cada iteración utiliza resultados de la anterior. Este patrón de dependencia limita el grado de paralelización posible y puede generar cuellos de botella en arquitecturas de múltiples núcleos o distribuidas. Diseñar versiones paralelas eficientes que mantengan la convergencia y precisión de estos métodos sigue siendo un área muy complicada..
+
+    \item \textbf{Equilibrio entre rendimiento y accesibilidad en bibliotecas:}
+    Aunque existen bibliotecas altamente optimizadas como SLEPc, ARPACK o Intel MKL, muchas de ellas requieren conocimientos técnicos avanzados para configurarse y utilizarse correctamente. Por otro lado, lenguajes de alto nivel como Python, con bibliotecas como NumPy y SciPy, priorizan la facilidad de uso, pero a menudo sacrifican rendimiento en problemas de gran escala. La creación de bibliotecas que combinen accesibilidad y rendimiento sigue siendo un desafío clave, especialmente para aplicaciones industriales y científicas.
+
+    \item \textbf{Precisión numérica en problemas mal condicionados:}
+    Los métodos iterativos y directos pueden enfrentar dificultades para calcular valores propios con precisión en matrices mal condicionadas o casi singulares. Esto ocurre debido a la acumulación de errores de redondeo, especialmente en arquitecturas paralelas que implican cálculos distribuidos. La implementación de algoritmos más robustos para estos casos es esencial en aplicaciones críticas.
+
+    \item \textbf{Adaptación a arquitecturas modernas:}
+    Muchos métodos tradicionales requieren adaptaciones para aprovechar eficientemente estos recursos. Esto incluye rediseñar algoritmos para paralelización masiva o ajustar bibliotecas para aprovechar las capacidades de hardware específico, como la memoria de alta velocidad en GPUs.
+\end{enumerate}
+
+
+\section{Implementación}
+En esta sección se detallan los métodos seleccionados para la evaluación experimental, justificando su elección y describiendo las implementaciones que se llevarán a cabo. La evaluación permite analizar el comportamiento de los métodos en diferentes escenarios y evaluar su versatilidad y eficiencia.
+
+\subsection{Justificación de los métodos seleccionados}
+En este trabajo se seleccionaron cuatro métodos principales para el cálculo de valores propios, cada uno elegido por sus características específicas y casos de uso. A continuación, se justifica la selección de cada uno:
+
+\begin{itemize}
+    \item \textbf{Método QR con MGS:}  
+     se eligió el método de descomposición QR basado en Gram-Schmidt Modificado (MGS) para la evaluación de valores propios, en lugar de métodos alternativos como el método de Householder. Esta decisión se tomó considerando las características específicas del problema y las ventajas que ofrece el método MGS en este contexto.
+\\
+    
+    El método MGS presenta varias ventajas relevantes para este proyecto:
+    \begin{itemize}
+        \item \textbf{Simplicidad de implementación:} El algoritmo MGS es conceptualmente sencillo y más directo de implementar en comparación con el método de Householder, que requiere el manejo de transformaciones más complejas.
+        \item \textbf{Paralelización eficiente:} Dado que MGS opera principalmente sobre columnas individuales de la matriz, se adapta de manera natural a la paralelización con herramientas como OpenMP. Esto permite acelerar significativamente las operaciones en sistemas multicore.
+        \item \textbf{Adecuado para matrices simétricas:} Las matrices utilizadas en este proyecto son simétricas y bien condicionadas. Esto reduce los problemas de inestabilidad numérica que, en otros casos, podrían hacer preferible el uso del método de Householder.
+    \end{itemize}
+
+    \item \textbf{Método Arnoldi:}  
+    Seleccionado por su capacidad para manejar matrices grandes y no simétricas, el método de Arnoldi genera una base ortonormal del subespacio de Krylov y aproxima los valores propios dominantes. Es adecuado para problemas donde solo se necesitan unos pocos valores propios relevantes y tiene la flexibilidad de usarse en arquitecturas paralelas mediante reinicio eficiente.
+
+    \item \textbf{Método Krylov-Schur:}  
+    Este método es una extensión del Arnoldi con un mecanismo optimizado de reinicio, lo que lo es ideal para programar y comparar con el metodo anteriormente mencionado.
+
+    \item \textbf{Método Lanczos:}  
+    Diseñado específicamente para matrices simétricas o hermíticas, el método de Lanczos reduce la matriz original a una forma tridiagonal, permitiendo calcular valores propios con gran eficiencia. Es ampliamente utilizado en problemas dispersos donde se necesita escalar a tamaños muy grandes. ideal para comparar con metodos anteriores.
+\end{itemize}
+
+
+\subsubsection{Limitaciones y desafíos de la paralelización}
+A pesar de sus ventajas, la paralelización también presenta desafíos:
+\begin{itemize}
+    \item \textbf{Dependencias entre operaciones:} En el método de Lanczos, cada iteración depende de los resultados de la anterior, lo que limita el grado de paralelización posible.
+    \item \textbf{Overhead de comunicación:} En arquitecturas distribuidas, como clústeres, el costo de transferir datos entre nodos puede afectar la ganancia de rendimiento.
+    \item \textbf{Eficiencia en matrices pequeñas:} Para matrices pequeñas, el overhead de la paralelización puede superar los beneficios, haciendo más eficiente una implementación serial.
+\end{itemize}
+
+
+
+\subsubsection{Bibliotecas y herramientas utilizadas}
+
+En este trabajo se utilizan herramientas específicas para implementar y analizar la paralelización en el cálculo de valores y vectores propios. 
+
+\paragraph{ Python con SLEPc y MPI:}
+Para los métodos iterativos implementados (\textit{Arnoldi}, \textit{Krylov-Schur} y \textit{Lanczos}), se utiliza el lenguaje Python aprovechando la biblioteca SLEPc (Scalable Library for Eigenvalue Problem Computations), que está específicamente diseñada para resolver problemas de valores propios en matrices grandes y dispersas, ofreciendo soporte para paralelización mediante MPI. 
+
+SLEPc proporciona una interfaz robusta que permite configurar parámetros clave de los algoritmos, como el tipo de reortogonalización, tolerancias y estrategias de reinicio. Esta biblioteca es ideal para problemas que requieren escalabilidad, ya que combina algoritmos avanzados con soporte eficiente para sistemas de memoria distribuida.
+
+\paragraph{C++ con OpenMP:} Se utilizó el lenguaje C++ en combinación con OpenMP debido a su capacidad para manejar cálculos de alto rendimiento en sistemas multicore. C++ ofrece un control detallado sobre el manejo de memoria y optimizaciones a bajo nivel, lo cual es crucial para implementar algoritmos como el QR de manera eficiente. Por otro lado, OpenMP permite paralelizar tareas de forma sencilla mediante directivas pragmáticas, optimizando operaciones como la ortogonalización de vectores y la multiplicación de matrices. Esta combinación proporciona un equilibrio entre rendimiento, portabilidad y facilidad de implementación en hardware moderno, asegurando una ejecución rápida incluso para matrices de gran tamaño.
+
+\newpage
+
+\subsection{Pseudocódigo del método QR con Gram-Schmidt Modificado (MGS)}
+
+A continuación, se presenta el pseudocódigo del método QR basado en Gram-Schmidt Modificado (MGS):
+
+\begin{algorithm}[H]
+\caption{Descomposición QR (Gram-Schmidt Modificado)}
+\begin{algorithmic}[1]
+\State \textbf{Entrada:} Matriz $A \in \mathbb{R}^{n \times n}$ (ordenada por columnas)   
+\State \textbf{Salida:} Matrices $Q \in \mathbb{R}^{n \times n}$ (ortogonal) y $R \in \mathbb{R}^{n \times n}$ (triangular superior)
+\State Inicializar $Q \gets A$
+\State Inicializar $R \gets I$ (matriz identidad de tamaño $n \times n$)
+\For{$i = 1$ \textbf{to} $n$}
+    \State Calcular norma de $Q[i]$: $||Q[i]|| = \sqrt{\sum_k Q[i,k]^2}$
+    \State Normalizar $Q[i]$: $Q[i] \gets Q[i] / ||Q[i]||$
+    \State Actualizar $R[i,i]$: $R[i,i] \gets ||Q[i]||$
+    \For{$j = i+1$ \textbf{to} $n$}
+        \State Calcular producto escalar: $R[i,j] \gets \sum_k Q[i,k] \cdot Q[j,k]$
+        \State Actualizar $Q[j]$: $Q[j] \gets Q[j] - R[i,j] \cdot Q[i]$
+    \EndFor
+\EndFor
+\State \Return $Q$, $R$
+\end{algorithmic}
+\end{algorithm}
+
+
+\subsubsection{Método de Arnoldi}
+
+Este algoritmo construye una base ortonormal del subespacio de Krylov y aproxima los valores propios más relevantes de una matriz. A continuación se presenta el pseudocódigo:
+
+\begin{algorithm}[H]
+\caption{Método de Arnoldi}
+\begin{algorithmic}[1]
+\State \textbf{Entrada:} Matriz $A \in \mathbb{R}^{n \times n}$, vector inicial $v_1$, número de iteraciones $m$
+\State \textbf{Salida:} Matriz Hessenberg $H_m$, base ortonormal $V_m$
+\State $v_1 \gets v_1 / \|v_1\|$ \Comment{Normalizar el vector inicial}
+\For{$j = 1$ \textbf{to} $m$}
+    \State $w \gets A v_j$ \Comment{Multiplicación matriz-vector}
+    \For{$i = 1$ \textbf{to} $j$}
+        \State $h_{i,j} \gets v_i^T w$ \Comment{Proyección sobre la base}
+        \State $w \gets w - h_{i,j} v_i$ \Comment{Ortogonalizar}
+    \EndFor
+    \State $h_{j+1,j} \gets \|w\|$
+    \If{$h_{j+1,j} \neq 0$}
+        \State $v_{j+1} \gets w / h_{j+1,j}$ \Comment{Añadir nuevo vector a la base}
+    \Else
+        \State \textbf{Break} \Comment{Convergencia alcanzada}
+    \EndIf
+\EndFor
+\State \Return $H_m$, $V_m$
+\end{algorithmic}
+\end{algorithm}
+
+
+\newpage
+\subsubsection{Método de Krylov-Schur}
+
+El método de Krylov-Schur es una mejora del método de Arnoldi, que implementa un mecanismo de reinicio eficiente para gestionar el crecimiento del subespacio de Krylov. El pseudocódigo es el siguiente:
+
+\begin{algorithm}[H]
+\caption{Método de Krylov-Schur}
+\begin{algorithmic}[1]
+\State \textbf{Entrada:} Matriz $A \in \mathbb{R}^{n \times n}$, vector inicial $v_1$, tolerancia $\epsilon$, número máximo de iteraciones $m$
+\State \textbf{Salida:} Valores propios aproximados $\lambda_i$, vectores propios aproximados $v_i$
+\State Construir subespacio de Krylov $V_m$ utilizando Arnoldi
+\State Calcular $H_m$, la matriz proyectada sobre $V_m$
+\While{\textbf{not convergido}}
+    \State Resolver el problema de valores propios en $H_m$: $H_m y_i = \lambda_i y_i$
+    \State Expandir o reiniciar $V_m$ según los $\lambda_i$
+    \State Actualizar el subespacio de Krylov y las proyecciones
+\EndWhile
+\State \Return $\lambda_i$, $v_i$
+\end{algorithmic}
+\end{algorithm}
+
+
+\subsubsection{Método de Lanczos}
+
+El método de Lanczos es un algoritmo iterativo eficiente diseñado para matrices simétricas. Aproxima unos pocos valores propios dominantes y sus vectores propios. El pseudocódigo es:
+
+\begin{algorithm}[H]
+\caption{Método de Lanczos}
+\begin{algorithmic}[1]
+\State \textbf{Entrada:} Matriz simétrica $A \in \mathbb{R}^{n \times n}$, vector inicial $v_1$, número de iteraciones $m$
+\State \textbf{Salida:} Matriz tridiagonal $T_m$, vectores $v_1, \dots, v_m$
+\State $v_1 \gets v_1 / \|v_1\|$, $\beta_0 \gets 0$, $v_0 \gets 0$
+\For{$j = 1$ \textbf{to} $m$}
+    \State $w \gets A v_j - \beta_{j-1} v_{j-1}$ \Comment{Proyección ortogonal}
+    \State $\alpha_j \gets v_j^T w$ \Comment{Proyección sobre $v_j$}
+    \State $w \gets w - \alpha_j v_j$ \Comment{Ortogonalizar}
+    \State $\beta_j \gets \|w\|$
+    \If{$\beta_j = 0$}
+        \State \textbf{Break} \Comment{Convergencia alcanzada}
+    \EndIf
+    \State $v_{j+1} \gets w / \beta_j$ \Comment{Añadir a la base}
+\EndFor
+\State Formar $T_m$ a partir de $\alpha_j$ y $\beta_j$
+\State \Return $T_m$, $v_1, \dots, v_m$
+\end{algorithmic}
+\end{algorithm}
+
+
+\newpage
+\section{Experimentos}
+En esta sección se presentan los experimentos realizados para evaluar los métodos seleccionados, divididos en dos categorías. Esta división responde a las diferencias fundamentales entre estos enfoques, como se detalla a continuación.
+\subsection{Justificación de la división experimental}
+
+En este trabajo se optó por realizar dos conjuntos principales de experimentos para evaluar los diferentes métodos utilizados en el cálculo de valores propios y vectores propios. La división experimental se justifica con base en las características de los algoritmos y sus implementaciones.
+
+\subsubsection{Experimentos con el Método QR}
+
+En este trabajo, el método QR se evaluó exclusivamente utilizando el MGS explicado anteriormente, tanto en implementaciones seriales como paralelas. Esta elección se justifica por las siguientes razones:
+
+\paragraph{Serialización:} El método es naturalmente serializable porque:
+\begin{itemize}
+    \item Cada columna $Q[i]$ se calcula después de completar las columnas anteriores $Q[1], Q[2], \dots, Q[i-1]$, lo que asegura un flujo lógico de ejecución.
+    \item Operaciones clave como la normalización, el producto escalar y la eliminación de proyecciones son directas y dependen únicamente de los datos previamente calculados.
+\end{itemize}
+
+\paragraph{Paralelización:} La paralelización se logra utilizando OpenMP en las siguientes partes del algoritmo:
+\begin{itemize}
+    \item \textbf{Ortogonalización de columnas:} Las actualizaciones de las columnas $V[j]$ en el bucle interno son independientes para $j > i$, lo que permite paralelizar estas operaciones entre múltiples hilos.
+    \item \textbf{Multiplicación de matrices:} Durante las iteraciones del algoritmo QR, la multiplicación $A = R \cdot Q$ es completamente paralelizable, ya que los elementos de la matriz resultante pueden calcularse de manera independiente.
+\end{itemize}
+
+
+\subsubsection{Experimentos con otros Métodos Iterativos (Arnoldi, Krylov-Schur y Lanczos)}
+
+Los métodos iterativos, como Arnoldi y Krylov-Schur, se evaluaron en un conjunto separado de experimentos debido a las siguientes razones:
+
+\begin{itemize}
+    \item Estos algoritmos están diseñados para problemas de matrices dispersas y de gran escala, donde solo se necesitan un subconjunto de valores propios relevantes.
+    \item Las implementaciones se realizaron utilizando la biblioteca SLEPc, optimizada para problemas paralelos, lo que los hace más adecuados para sistemas distribuidos y arquitecturas modernas.
+    \item A diferencia del método QR, estos métodos no requieren trabajar con toda la matriz en cada iteración, lo que los hace más eficientes para problemas grandes, pero introduce complejidades relacionadas con la convergencia.
+    \item Los mismos no calculan estrictamente todos los valores propios, sino un subconjunto reducido que se considere importante. En cambio el QR sí los calcula todos. Sin embargo, en esta oportunidad sí se calcularon todos los v
+\end{itemize}
+
+\subsection{Ejecuciones con QR - MGS}
+
+Para evaluar el rendimiento del método QR con Gram-Schmidt Modificado (MGS), se llevaron a cabo ejecuciones con matrices de tamaños variados (\(10 \times 10\), \(100 \times 100\), \(500 \times 500\) y \(1000 \times 1000\)) en configuraciones con \(1\), \(2\), \(4\), \(8\) y \(16\) hilos. Las siguientes consideraciones fueron aplicadas:
+
+\paragraph{Límite de iteraciones:} Se estableció un límite máximo de 1000 iteraciones por cada ejecución para evitar cálculos innecesarios en matrices que no convergieran rápidamente.
+
+\paragraph{Criterio de convergencia:} El algoritmo incluye un criterio de parada basado en la convergencia de los valores propios. La ejecución se detiene si la diferencia entre los valores propios consecutivos de la matriz diagonal alcanza un valor inferior a la tolerancia especificada.
+
+\paragraph{Registro de tiempos:} Los tiempos de ejecución se midieron para cada configuración utilizando la biblioteca \texttt{std::chrono} en C++, asegurando una medición precisa. Cada tiempo registrado representa la duración total de la ejecución para una combinación de tamaño de matriz y número de hilos.
+
+\subsubsection{Resultados}
+
+Las pruebas se realizaron utilizando matrices de tamaño \(10 \times 10\), \(100 \times 100\), \(500 \times 500\), y \(1000 \times 1000\) con configuraciones de \(1\), \(2\), \(4\), \(8\) y \(16\) hilos. A continuación, se presentan los tiempos de ejecución registrados:
+
+\begin{table}[H]
+\centering
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\textbf{Tamaño de matriz} & \multicolumn{5}{c|}{\textbf{Hilos}} \\ \hline
+ & 1 & 2 & 4 & 8 & 16 \\ \hline
+10   & 0.0006404 s & 0.0004273 s & 0.0003882 s & 0.0254347 s & 0.0018341 s \\ \hline
+100  & 1.98818 s   & 1.23606 s   & 0.796942 s  & 0.790166 s  & 3.74535 s   \\ \hline
+500  & 304.167 s   & 161.898 s   & 108.649 s   & 116.13 s    & 81.1675 s   \\ \hline
+1000 & 1664.28 s   & 1264.22 s   & 821.171 s   & 628.941 s   & 629.468 s   \\ \hline
+\end{tabular}
+\caption{Tiempos de ejecución para diferentes configuraciones de hilos.}
+\end{table}
+
+\paragraph{Observaciones:}
+\begin{itemize}
+    \item El criterio de convergencia permitió detener la ejecución tempranamente en matrices pequeñas (\(10 \times 10\)), donde todas las configuraciones convergieron en una sola iteración.
+    \item Para matrices más grandes, el tiempo de ejecución se redujo significativamente con el aumento del número de hilos, aunque el overhead de paralelización afectó la eficiencia en configuraciones de 16 hilos.
+    \item La eficiencia disminuye con matrices pequeñas debido al bajo tiempo total de ejecución y al costo del overhead de sincronización entre hilos.
+\end{itemize}
+
+\subsubsection{Análisis de rendimiento}
+
+\begin{table}[H]
+\centering
+\label{tab:speedup}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\multicolumn{6}{|c|}{\textbf{SpeedUp}} \\
+\hline
+\multicolumn{1}{|c|}{\textbf{Tamaño de matriz}} & \multicolumn{5}{c|}{\textbf{Hilos}} \\ \hline
+ & 1 & 2 & 4 & 8 & 16 \\ \hline
+10   & 1.00  & 1.50  & 1.65  & 0.03  & 0.35 \\ \hline
+100  & 1.00  & 1.61  & 2.49  & 2.52  & 0.53 \\ \hline
+500  & 1.00  & 1.88  & 2.80  & 2.62  & 3.74 \\ \hline
+1000 & 1.00  & 1.32  & 2.03  & 2.65  & 2.64 \\ \hline
+\end{tabular}
+\caption{Speedup del algoritmo QR con Gram-Schmidt Modificado en función del número de hilos.}
+\end{table}
+
+
+\begin{table}[H]
+\centering
+\label{tab:efficiency}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+\multicolumn{6}{|c|}{\textbf{Eficiencia}} \\
+\hline
+\multicolumn{1}{|c|}{\textbf{Tamaño de matriz}} & \multicolumn{5}{c|}{\textbf{Hilos}} \\ \hline
+ & 1 & 2 & 4 & 8 & 16 \\ \hline
+10   & 1.00  & 0.75  & 0.41  & 0.00375  & 0.022 \\ \hline
+100  & 1.00  & 0.80  & 0.62  & 0.315    & 0.033 \\ \hline
+500  & 1.00  & 0.94  & 0.70  & 0.3275   & 0.234 \\ \hline
+1000 & 1.00  & 0.66  & 0.51  & 0.33125  & 0.165 \\ \hline
+\end{tabular}
+\caption{Eficiencia del algoritmo QR con Gram-Schmidt Modificado en función del número de hilos.}
+\end{table}
+
+\subsubsection{Análisis de la eficiencia y el Speedup}
+
+El análisis de las métricas de \textbf{Speedup} y \textbf{Eficiencia} permite evaluar la escalabilidad y el nivel de paralelización del algoritmo QR con Gram-Schmidt Modificado (MGS). A continuación, se presentan las observaciones clave y las conclusiones derivadas:
+
+\paragraph{Speedup:} 
+El \textbf{Speedup} mide la mejora en el tiempo de ejecución al incrementar el número de hilos. Se observaron las siguientes tendencias:
+\begin{itemize}
+    \item Para \textbf{matrices pequeñas} (\(10 \times 10\)), el Speedup es limitado, alcanzando apenas \(S(16) = 0.35\). Esto ocurre porque el costo computacional es bajo y el overhead asociado a la creación y sincronización de hilos domina el tiempo total de ejecución.
+    \item Para \textbf{matrices medianas y grandes} (\(100 \times 100\) a \(1000 \times 1000\)), el Speedup es más significativo. Por ejemplo:
+    \begin{itemize}
+        \item Para \(500 \times 500\), el Speedup alcanza \(S(16) = 3.74\).
+        \item Para \(1000 \times 1000\), el Speedup es \(S(16) = 2.64\).
+    \end{itemize}
+    Sin embargo, el crecimiento no es lineal, lo que indica la presencia de dependencias secuenciales en el algoritmo, limitadas por la Ley de Amdahl.
+    \item La \textbf{Ley de Amdahl} establece que el Speedup está limitado por la fracción del algoritmo que no puede paralelizarse. En este caso, las dependencias entre columnas durante la ortogonalización afectan la escalabilidad.
+\end{itemize}
+
+\paragraph{Eficiencia:} 
+La \textbf{Eficiencia} evalúa qué tan efectivamente se utilizan los hilos adicionales. Se observaron las siguientes características:
+\begin{itemize}
+    \item Para \textbf{matrices pequeñas}, la eficiencia disminuye drásticamente con más hilos. Por ejemplo:
+    \begin{itemize}
+        \item Para \(10 \times 10\) y 16 hilos, la eficiencia es \(E(16) = 0.022\).
+    \end{itemize}
+    Esto indica que el overhead asociado al paralelismo supera cualquier beneficio obtenido.
+    \item Para \textbf{matrices grandes}, la eficiencia mejora ligeramente, aunque sigue lejos del ideal. Por ejemplo:
+    \begin{itemize}
+        \item Para \(500 \times 500\) y 16 hilos, la eficiencia es \(E(16) = 0.234\).
+        \item Para \(1000 \times 1000\) y 16 hilos, la eficiencia es \(E(16) = 0.165\).
+    \end{itemize}
+    Esto refleja que, aunque las matrices grandes aprovechan mejor el paralelismo, el overhead sigue siendo significativo.
+\end{itemize}
+
+\paragraph{Escalabilidad del algoritmo:}
+La escalabilidad del algoritmo se evaluó en términos de escalabilidad fuerte y débil:
+\begin{itemize}
+    \item En la escalabilidad fuerte, donde el tamaño de la matriz es constante y se incrementan los hilos, se observa que el Speedup tiende a estabilizarse o disminuir para configuraciones con muchos hilos, especialmente en matrices pequeñas. Esto indica que el algoritmo no escala perfectamente debido al overhead y la fracción no paralelizable.
+    \item En la escalabilidad débil, donde el tamaño de la matriz aumenta proporcionalmente al número de hilos, el algoritmo muestra mejor eficiencia, ya que el costo computacional adicional reduce el impacto relativo del overhead.
+\end{itemize}
+
+\paragraph{Conclusión:}
+Se podria concluir que el algoritmo QR con MGS es "parcialmente" paralelizable. Mientras que ciertas partes del algoritmo, como la actualización de columnas (\(V[j]\)) durante la ortogonalización, son altamente paralelizables, otras, como las dependencias secuenciales entre iteraciones, limitan la escalabilidad. Para maximizar la eficiencia y el Speedup, se recomienda:
+\begin{itemize}
+    \item Usar matrices grandes donde el costo computacional justifique el overhead.
+    \item Limitar el número de hilos a configuraciones moderadas (e.g., \(4\) u \(8\)), especialmente para matrices pequeñas.
+\end{itemize}
+
+
+
+
+\subsection{Ejecuciones con Arnoldi, Krylov-Schur y Lanczos}
+
+
+
+\newpage
+\begin{thebibliography}{9}
+
+\bibitem{LANCZOS}
+Metodo de Lanczos.\\
+Disponible en: \url{https://help.autodesk.com/view/RSAPRO/2022/ESP/?guid=GUID-9A509DAF-7A96-4B90-8223-6C2413BCC326}.  
+Último acceso: 2 de Diciembre de 2024.
+
+\bibitem{QR}
+Metodo QR.\\
+Disponible en: \url{https://es.wikipedia.org/wiki/Algoritmo_QR}.  
+Último acceso: 2 de Diciembre de 2024.
+
+\bibitem{MetodoDeLasPotencias}
+Metodo de las Potencias.\\
+Disponible en: \url{https://fcen.uncuyo.edu.ar/upload/2018-autovalores3.pdf}.  
+Último acceso: 2 de Diciembre de 2024
+
+\bibitem{LAPACK}
+LAPACK – Linear Algebra PACKage.  \\
+Disponible en: \url{https://www.netlib.org/lapack/}.  
+Último acceso: 7 de Diciembre de 2024.
+
+\bibitem{SuiteSparse}
+T. A. Davis y E. Palamadai Natarajan, \emph{SuiteSparse: A Suite of Sparse Matrix Packages}. \\ 
+Disponible en: \url{https://people.engr.tamu.edu/davis/suitesparse.html}.  
+Último acceso: 8 de Diciembre de 2024.
+
+\bibitem{ARPACK}
+ARPACK – Arnoldi Package.  \\
+Disponible en: \url{https://www.caam.rice.edu/software/ARPACK/}.  
+Último acceso: 8 de Diciembre de 2024.
+
+\bibitem{cuBLAS}
+NVIDIA, \emph{cuBLAS Library Documentation}.\\  
+Disponible en: \url{https://docs.nvidia.com/cuda/cublas/index.html}.  
+Último acceso: 11 de Diciembre de 2024.
+
+\bibitem{cuSOLVER}
+NVIDIA, \emph{cuSOLVER Library Documentation}.  \\
+Disponible en: \url{https://docs.nvidia.com/cuda/cusolver/index.html}.  
+Último acceso: 11 de Diciembre de 2024.
+
+\bibitem{MKL}
+Intel, \emph{Math Kernel Library (MKL)}.  \\
+Disponible en: \url{https://www.intel.com/content/www/us/en/developer/tools/oneapi/onemkl.html}.  
+Último acceso: 11 de Diciembre de 2024.
+
+\bibitem{SciPy}
+SciPy Documentation.  \\
+Disponible en: \url{https://scipy.org/}.  
+Último acceso: 12 de Diciembre de 2024.
+
+\bibitem{NumPy}
+NumPy Documentation.  \\
+Disponible en: \url{https://numpy.org/}.  
+Último acceso: 9 de Diciembre de 2024.
+
+\bibitem{OpenMP}
+OpenMP – Open Multi-Processing.\\
+Disponible en: \url{https://ocw.uc3m.es/pluginfile.php/2851/mod_page/content/9/curso_openMP.pdf}.  
+Último acceso: 12 de Diciembre de 2024.
+
+\bibitem{MPI}
+MPI – Message Passing Interface.\\
+Disponible en: \url{http://informatica.uv.es/iiguia/ALP/materiales2005/2_2_introMPI.htm}.  
+Último acceso: 12 de Diciembre de 2024.
+
+\bibitem{SLEPc}
+SLEPc – Scalable Library for Eigenvalue Problem Computations.\\
+Disponible en: \url{https://slepc.upv.es/}.  
+Último acceso: 10 de Diciembre de 2024.
+
+\bibitem{Arnoldi}
+Método de Arnoldi.\\
+Disponible en: \url{https://en.wikipedia.org/wiki/Arnoldi_iteration}.  
+Último acceso: 14 de Diciembre de 2024.
+
+\bibitem{KrylovSchur}
+Método de Krylov-Schur.\\
+Disponible en: \url{https://slepc.upv.es/documentation/reports/str7.pdf}.  
+Último acceso: 16 de Diciembre de 2024.
+
+\bibitem{QR-MGS}
+Método de QR modificado con Grand Smith.\\
+Disponible en: \url{https://www.oocities.org/mialgebralinealmas/78MetododeGramSchmidtmodificado.doc}. 
+Último acceso: 12 de Diciembre de 2024.
+
+
+
+
+\end{thebibliography}
+
+\end{document}
