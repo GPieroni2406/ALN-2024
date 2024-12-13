@@ -1,0 +1,81 @@
+Ejecutando: mpiexec --use-hwthread-cpus --oversubscribe -n 2 /usr/bin/python3 power_method.py --matrix 32 --iter 1000 --verbose 1 --save results/results_threads2_size32
+Rank 0:
+- Total Runtime:     0.01 Secs.
+
+Ejecutando: mpiexec --use-hwthread-cpus --oversubscribe -n 2 /usr/bin/python3 power_method.py --matrix 128 --iter 1000 --verbose 1 --save results/results_threads2_size128
+Rank 0:
+- Total Runtime:     0.01 Secs.
+
+Ejecutando: mpiexec --use-hwthread-cpus --oversubscribe -n 2 /usr/bin/python3 power_method.py --matrix 512 --iter 1000 --verbose 1 --save results/results_threads2_size512
+Rank 0:
+- Total Runtime:     0.03 Secs.
+
+Ejecutando: mpiexec --use-hwthread-cpus --oversubscribe -n 2 /usr/bin/python3 power_method.py --matrix 1024 --iter 1000 --verbose 1 --save results/results_threads2_size1024
+Rank 0:
+- Total Runtime:     0.22 Secs.
+
+Ejecutando: mpiexec --use-hwthread-cpus --oversubscribe -n 2 /usr/bin/python3 power_method.py --matrix 2048 --iter 1000 --verbose 1 --save results/results_threads2_size2048      
+Rank 0:
+- Total Runtime:     1.37 Secs.
+
+Ejecutando: mpiexec --use-hwthread-cpus --oversubscribe -n 4 /usr/bin/python3 power_method.py --matrix 32 --iter 1000 --verbose 1 --save results/results_threads4_size32
+Rank 0:
+- Total Runtime:     0.01 Secs.
+
+Ejecutando: mpiexec --use-hwthread-cpus --oversubscribe -n 4 /usr/bin/python3 power_method.py --matrix 128 --iter 1000 --verbose 1 --save results/results_threads4_size128        
+Rank 0:
+- Total Runtime:     0.01 Secs.
+
+Ejecutando: mpiexec --use-hwthread-cpus --oversubscribe -n 4 /usr/bin/python3 power_method.py --matrix 512 --iter 1000 --verbose 1 --save results/results_threads4_size512        
+Rank 0:
+- Total Runtime:     0.03 Secs.
+
+Ejecutando: mpiexec --use-hwthread-cpus --oversubscribe -n 4 /usr/bin/python3 power_method.py --matrix 1024 --iter 1000 --verbose 1 --save results/results_threads4_size1024      
+Rank 0:
+- Total Runtime:     0.12 Secs.
+
+Ejecutando: mpiexec --use-hwthread-cpus --oversubscribe -n 4 /usr/bin/python3 power_method.py --matrix 2048 --iter 1000 --verbose 1 --save results/results_threads4_size2048      
+Rank 0:
+- Total Runtime:     1.49 Secs.
+
+Ejecutando: mpiexec --use-hwthread-cpus --oversubscribe -n 8 /usr/bin/python3 power_method.py --matrix 32 --iter 1000 --verbose 1 --save results/results_threads8_size32
+Rank 0:
+- Total Runtime:     0.02 Secs.
+
+Ejecutando: mpiexec --use-hwthread-cpus --oversubscribe -n 8 /usr/bin/python3 power_method.py --matrix 128 --iter 1000 --verbose 1 --save results/results_threads8_size128        
+Rank 0:
+- Total Runtime:     0.02 Secs.
+
+Ejecutando: mpiexec --use-hwthread-cpus --oversubscribe -n 8 /usr/bin/python3 power_method.py --matrix 512 --iter 1000 --verbose 1 --save results/results_threads8_size512        
+Rank 0:
+- Total Runtime:     0.04 Secs.
+
+Ejecutando: mpiexec --use-hwthread-cpus --oversubscribe -n 8 /usr/bin/python3 power_method.py --matrix 1024 --iter 1000 --verbose 1 --save results/results_threads8_size1024      
+Rank 0:
+- Total Runtime:    21.68 Secs.
+
+Ejecutando: mpiexec --use-hwthread-cpus --oversubscribe -n 8 /usr/bin/python3 power_method.py --matrix 2048 --iter 1000 --verbose 1 --save results/results_threads8_size2048      
+Rank 0:
+- Total Runtime:     2.80 Secs.
+
+Ejecutando: mpiexec --use-hwthread-cpus --oversubscribe -n 16 /usr/bin/python3 power_method.py --matrix 32 --iter 1000 --verbose 1 --save results/results_threads16_size32        
+Rank 0:
+- Total Runtime:     0.18 Secs.
+
+Ejecutando: mpiexec --use-hwthread-cpus --oversubscribe -n 16 /usr/bin/python3 power_method.py --matrix 128 --iter 1000 --verbose 1 --save results/results_threads16_size128      
+Rank 0:
+- Total Runtime:     0.18 Secs.
+
+Ejecutando: mpiexec --use-hwthread-cpus --oversubscribe -n 16 /usr/bin/python3 power_method.py --matrix 512 --iter 1000 --verbose 1 --save results/results_threads16_size512      
+Rank 0:
+- Total Runtime:     0.25 Secs.
+
+Ejecutando: mpiexec --use-hwthread-cpus --oversubscribe -n 16 /usr/bin/python3 power_method.py --matrix 1024 --iter 1000 --verbose 1 --save results/results_threads16_size1024    
+Rank 0:
+- Total Runtime:     0.52 Secs.
+
+Ejecutando: mpiexec --use-hwthread-cpus --oversubscribe -n 16 /usr/bin/python3 power_method.py --matrix 2048 --iter 1000 --verbose 1 --save results/results_threads16_size2048    
+Rank 0:
+- Total Runtime:     2.06 Secs.
+
+Ejecuciones completas. Resultados guardados en el directorio 'results'.

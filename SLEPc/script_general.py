@@ -5,7 +5,7 @@ import os
 metodos = ["arnoldi", "krylov-schur"] # Métodos a ejecutar
 tamaños_matriz = [10, 50, 100, 500, 1000, 2000]  # Tamaño de la matriz dispersa
 archivo_matriz = "matrix.dat"  # Archivo para guardar la matriz generada
-num_procesos = [8, 16]  # Número de procesos para paralelismo
+num_procesos = [1, 2, 4, 8, 16]  # Número de procesos para paralelismo
 resultados = {}
 
 # Crear directorio para resultados
